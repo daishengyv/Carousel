@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body,html{
+            margin:0;
+            height:100%;
+            overflow:hidden;
+        }
+        .content{
+            width:100%;
+            height:100%;
+        }
+        .sliders{
+            position:relative;
+            width:100%;
+            /*background-color: #1d189e;*/
+            height: calc(100% - 16px);
+        }
+        .sliders .slider-item{
+            width:100%;
+            height:100%;
+            position: absolute;
+            top:0;
+            left:0;
+            /*background-image:url(images/1.jpg);*/
+            background-size:cover;
+            opacity:1;
+            transition:1s;
+        }
+        .sliders .slider-item.active{
+            opacity:1;
+        }
+        .sliders .slider-item.activeL{
+            transform: translateX(-100%)  scale(0.5);
+            opacity:0;
+        }
+        .sliders .slider-item.activeR{
+            transform: translateX(100%) scale(0.5) ;
+            opacity:0;
+        }
+        .sliders .slider-item.activeT{
+            transform:  scale(0.1) rotate(-360deg);
+            opacity:0;
+        }
+        .sliders .slider-item.activeB{
+            transform:  scale(5) rotate(360deg);
+            opacity:0;
+        }
+        .nav{
+            width:100%;
+            height: 16px;
+            background-color: #ffffff;
+            display:flex;
+        }
+        .nav .nav-item{
+            flex:1;
+            height:100%;
+            position:relative;
+            background-color: #93908d;
+            overflow: hidden;
+        }
+
+        .nav .nav-item .nav-show{
+            display:inline-block ;
+            width:100%;
+            height:100px;
+            position:absolute;
+            top:-120px;
+            background-color: #fa15eb;
+            background-size:cover;
+            transition:0.5s;
+            opacity: 0;
+            -webkit-box-reflect:below 0px -webkit-linear-gradient(bottom,red,rgba(0,0,0,0) 30%);
+        }
+        .nav .nav-item:hover{
+            overflow: visible;
+            background-color:#fff;
+        }
+        .nav .nav-item.active{
+            background-color: #e15671;
+        }
+        .nav .nav-item + .nav-item{
+            margin-left:1px;
+        }
+        .nav .nav-item::after{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            width:0;
+            height:100%;
+            background-color: #fff;
+            transition:0.5s linear;
+            border:1px solid #fff;
+            box-sizing:border-box;
+            border-bottom:0;
+
+        }
+        .nav .nav-item:hover .nav-show{
+            opacity: 1;
+            transform:translateY(20px);
+        }
+
+        .nav .nav-item:hover:after{
+            width:100%;
+            background-color: transparent;
+
+        }
+        .prev,
+        .next{
+            width:100px;
+            height:100px;
+            background-image:url(images/btn_next.png);
+            background-size:cover;
+            position:absolute;
+            right:0;
+            top:50%;
+            transform: translateY(-50%);
+        }
+        .prev{
+            background-image:url(images/btn_prev.png);
+            left:0;
+        }
+    </style>
+</head>
+<body>
+<div class="content">
+    <div class="sliders">
+    </div>
+    <div class="prev"></div>
+    <div class="next"></div>
+    <div class="nav">
+    </div>
+</div>
+<script>
+    //数据
+    var dataImg = [
+        'images/1.jpg',
+        'images/2.jpg',
+        'images/3.jpg',
+        'images/4.jpg',
+        'images/5.jpg',
+        'images/6.jpg',
+        'images/7.jpg'
+    ];
+    //数据生成页面
+    var sliders = document.querySelector('.sliders');
+    var nav = document.querySelector('.nav');
+    var content = document.querySelector('.content');
+    console.log(sliders, nav);
+    var str1 = '',str2 = '';
+    for(var i=0;i<dataImg.length;i++){
+        str1 += `<div class="slider-item" style="background-image:url(${dataImg[i]})"></div>`;
+        str2 += `<span class="nav-item"><i class="nav-show" style="background-image:url(${dataImg[i]})"></i></span>`;
+    }
+    sliders.innerHTML = str1;
+    nav.innerHTML = str2;
+    //初始化
+    var sliderItems = document.querySelectorAll('.slider-item');
+    var navItems = document.querySelectorAll('.nav-item');
+    var len = dataImg.length;
+    var current = 0;
+
+    console.log(sliderItems, navItems);
+
+    init();
+
+    //给navItems添加点击事件
+    for(var k=0;k<navItems.length;k++){
+        (function (k){
+            navItems[k].onclick = function (){
+                current = k;
+                init();
+            }
+        })(k);
+    }
+    //上一张prev
+    var prev = document.querySelector('.prev');
+    prev.onclick = function (){
+        current = current > 0 ? --current:len-1;
+        init();
+    };
+
+    //下一张next
+    var next = document.querySelector('.next');
+    next.onclick = function (){
+        current = current<len-1? ++current:0;
+        init();
+    };
+    var onOff = true;
+    var bb = 1;
+    var num =0;
+    function init(){
+        for(var j=0;j<len;j++){
+            sliderItems[j].classList.remove('active','activeL','activeR');
+            navItems[j].classList.remove('active');
+            if(onOff){
+                sliderItems[j].classList.add('activeL');
+            }else{
+                sliderItems[j].classList.add('activeR');
+            }
+        }
+
+
+        onOff = !onOff;
+        sliderItems[current].classList.remove('activeL');
+        sliderItems[current].classList.remove('activeR');
+        sliderItems[current].classList.remove('activeT');
+        sliderItems[current].classList.remove('activeB');
+        navItems[current].classList.add('active');
+        num = current === len-1?0:current + 1;
+        content.style['background-image'] = 'url('+ dataImg[num]+')';
+        console.log(content.style['background-image']);
+    }
+
+    //添加定时器
+    var timer;
+    function autoPlay(){
+        clearInterval(timer);
+        timer = setInterval(next.onclick,3000);
+    }
+    autoPlay();
+
+
+    content.onmousemove = function (){
+        clearInterval(timer);
+    };
+    content.onmouseout = function (){
+        autoPlay();
+    }
+</script>
+</body>
+</html>
